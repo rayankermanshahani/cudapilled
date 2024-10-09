@@ -76,7 +76,7 @@ int main(void) {
 
   /* copy operand objects from host to device */
   cudaMemcpy(A_d, A_h, N, cudaMemcpyHostToDevice);
-  cudaMemcpy(B_d, A_h, N, cudaMemcpyHostToDevice);
+  cudaMemcpy(B_d, B_h, N, cudaMemcpyHostToDevice);
 
   /* launch kernel with: N/256 blocks per grid and 256 threads per block */
   clock_gettime(CLOCK_MONOTONIC, &start_time);
