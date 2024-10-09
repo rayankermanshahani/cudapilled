@@ -2,7 +2,7 @@
 NVCC := nvcc
 
 # Compiler flags
-NVCC_FLAGS := -O3 -arch=sm_70
+NVCC_FLAGS := -O3 -arch=sm_87
 
 # Build directory
 BUILD_DIR := build
@@ -10,26 +10,19 @@ BUILD_DIR := build
 # Source files
 SRCS := $(wildcard *.cu)
 
-# Object files
-OBJS := $(SRCS:%.cu=$(BUILD_DIR)/%.o)
-
-# Executable name
-EXEC := $(BUILD_DIR)/cuda_program
+# Executables (one for each source file)
+EXECS := $(SRCS:%.cu=$(BUILD_DIR)/%)
 
 # Default target
-all: $(BUILD_DIR) $(EXEC)
+all: $(BUILD_DIR) $(EXECS)
 
 # Rule to create build directory
 $(BUILD_DIR):
 	mkdir -p $@
 
-# Rule to create executable
-$(EXEC): $(OBJS)
-	$(NVCC) $(NVCC_FLAGS) $^ -o $@
-
-# Rule to compile source files
-$(BUILD_DIR)/%.o: %.cu
-	$(NVCC) $(NVCC_FLAGS) -c $< -o $@
+# Rule to create executables
+$(BUILD_DIR)/%: %.cu
+	$(NVCC) $(NVCC_FLAGS) $< -o $@
 
 # Clean target
 clean:

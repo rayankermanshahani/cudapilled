@@ -35,9 +35,15 @@ void val_init(float *A, long int n, float value) {
 /* vector addition kernel */
 __global__ void vecAddKernel(const float *A, const float *B, float *C,
                              long int n) {
-  int i = blockDim.x * blockIdx.x + threadIdx.x;
-  if (i < n) {
+  /* each thread processes two adjacent elements */
+  int i = (blockDim.x * blockIdx.x + threadIdx.x) * 2;
+
+  if (i < n) { /* process the first element */
     C[i] = A[i] + B[i];
+  }
+
+  if (i + 1 < n) { /* process the second element */
+    C[i + 1] = A[i + 1] + B[i + 1];
   }
 }
 
@@ -67,6 +73,9 @@ int main(void) {
   /* initialize host objects */
   rand_init(A_h, N);
   rand_init(B_h, N);
+  /*
+  rand_init(C_h, N);
+  */
 
   /* copy operand objects from host to device */
   cudaMemcpy(A_d, A_h, N, cudaMemcpyHostToDevice);
