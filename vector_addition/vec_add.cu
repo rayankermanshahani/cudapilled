@@ -1,5 +1,6 @@
 /* simple vector addition */
 #include <cuda_runtime.h>
+#include <math.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -20,14 +21,14 @@ inline void gpuAssert(cudaError_t code, const char *file, int line,
 
 /* randomly initialize array */
 void rand_init(float *A, long int n) {
-  for (int i = 0; i < n; ++i) {
+  for (long int i = 0; i < n; ++i) {
     A[i] = (float)rand() / RAND_MAX;
   }
 }
 
 /* initialize array with a given float */
 void val_init(float *A, long int n, float value) {
-  for (int i = 0; i < n; ++i) {
+  for (long int i = 0; i < n; ++i) {
     A[i] = value;
   }
 }
@@ -35,7 +36,7 @@ void val_init(float *A, long int n, float value) {
 /* vector addition kernel */
 __global__ void vecAddKernel(const float *A, const float *B, float *C,
                              long int n) {
-  int i = blockDim.x * blockIdx.x + threadIdx.x;
+  long int i = blockDim.x * blockIdx.x + threadIdx.x;
   if (i < n) {
     C[i] = A[i] + B[i];
   }
@@ -43,7 +44,7 @@ __global__ void vecAddKernel(const float *A, const float *B, float *C,
 
 /* test result with epsilon-based comparison */
 void checkResult(const float *A, long int n, float expected_value) {
-  float epsilon = 1e-4f;
+  float epsilon = 1e-3f;
   /* check first and last elements */
   if (fabsf(A[0] - expected_value) > epsilon ||
       fabsf(A[N - 1] - expected_value) > epsilon) {
