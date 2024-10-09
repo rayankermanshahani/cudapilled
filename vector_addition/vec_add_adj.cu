@@ -73,9 +73,6 @@ int main(void) {
   /* initialize host objects */
   rand_init(A_h, N);
   rand_init(B_h, N);
-  /*
-  rand_init(C_h, N);
-  */
 
   /* copy operand objects from host to device */
   cudaMemcpy(A_d, A_h, N, cudaMemcpyHostToDevice);
