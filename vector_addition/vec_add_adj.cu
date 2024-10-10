@@ -6,17 +6,14 @@
 #define N 1000000 /* number of elements in each array (object) */
 
 /* cuda error handling */
-#define CUDA_ERR_CHECK(ans)                                                    \
-  { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line,
-                      bool abort = true) {
-  if (code != cudaSuccess) {
-    fprintf(stderr, "gpuAssert: %s in %s on line %d.\n",
-            cudaGetErrorString(code), file, line);
-    if (abort)
-      exit(code);
+void cudaCheck(cudaError_t err, const char *file, int line) {
+  if (err != cudaSuccess) {
+    fprintf(stderr, "[CUDA ERROR] at file %s:%d\n%s\n", __FILE__, __LINE__,
+            cudaGetErrorString(err));
+    exit(EXIT_FAILURE);
   }
 }
+#define CUDA_CHECK(err) (cudaCheck(err, __FILE__, __LINE__))
 
 /* randomly initialize array */
 void rand_init(float *A, long int n) {
@@ -66,17 +63,17 @@ int main(void) {
   C_h = (float *)malloc(size);
 
   /* allocate memory for objects on device */
-  CUDA_ERR_CHECK(cudaMalloc((void **)&A_d, size));
-  CUDA_ERR_CHECK(cudaMalloc((void **)&B_d, size));
-  CUDA_ERR_CHECK(cudaMalloc((void **)&C_d, size));
+  CUDA_CHECK(cudaMalloc((void **)&A_d, size));
+  CUDA_CHECK(cudaMalloc((void **)&B_d, size));
+  CUDA_CHECK(cudaMalloc((void **)&C_d, size));
 
   /* initialize host objects */
   rand_init(A_h, N);
   rand_init(B_h, N);
 
   /* copy operand objects from host to device */
-  cudaMemcpy(A_d, A_h, N, cudaMemcpyHostToDevice);
-  cudaMemcpy(B_d, B_h, N, cudaMemcpyHostToDevice);
+  CUDA_CHECK(cudaMemcpy(A_d, A_h, N, cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpy(B_d, B_h, N, cudaMemcpyHostToDevice));
 
   /* launch kernel with: N/256 blocks per grid and 256 threads per block */
   clock_gettime(CLOCK_MONOTONIC, &start_time);
@@ -87,7 +84,7 @@ int main(void) {
                         (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
 
   /* copy result object from device to host */
-  cudaMemcpy(C_h, C_d, N, cudaMemcpyDeviceToHost);
+  CUDA_CHECK(cudaMemcpy(C_h, C_d, N, cudaMemcpyDeviceToHost));
 
   /* free host memory */
   free(A_h);
@@ -95,9 +92,9 @@ int main(void) {
   free(C_h);
 
   /* free device memory */
-  CUDA_ERR_CHECK(cudaFree(A_d));
-  CUDA_ERR_CHECK(cudaFree(B_d));
-  CUDA_ERR_CHECK(cudaFree(C_d));
+  CUDA_CHECK(cudaFree(A_d));
+  CUDA_CHECK(cudaFree(B_d));
+  CUDA_CHECK(cudaFree(C_d));
 
   fprintf(stdout,
           "It took %f seconds to add two vectors of length %d in cuda.\n",
