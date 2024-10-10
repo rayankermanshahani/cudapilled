@@ -1,5 +1,1 @@
-I am taking the cuda pill.
-
-Resources:
-- Programming Massively Parallel Processors (ISBN: 978-0323912310)
-- NVIDIA Docs: https://docs.nvidia.com/cuda/pdf/CUDA_C_Programming_Guide.pdf
+I am buying $NVDA. I am overheating my 3090s. I am programming massively parallel processors. I am taking the cudapill.
