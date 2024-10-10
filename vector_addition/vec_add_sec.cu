@@ -33,10 +33,18 @@ void val_init(float *A, long int n, float value) {
 /* vector addition kernel */
 __global__ void vecAddKernel(const float *A, const float *B, float *C,
                              long int n) {
-  /* calculate global index for each thread */
-  long int i = blockDim.x * blockIdx.x + threadIdx.x;
-  if (i < n) {
+  /* each block processes two adjacent sections of the object data (separated by
+   * `blockDim.x` elements) */
+  long int i = (2 * blockDim.x) * blockIdx.x + threadIdx.x;
+
+  if (i < n) { /* process an element in the first section */
     C[i] = A[i] + B[i];
+  }
+
+  int j = i + blockDim.x;
+
+  if (j < n) { /* process an element in the second section */
+    C[j] = A[j] + B[j];
   }
 }
 
