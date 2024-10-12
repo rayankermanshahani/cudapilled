@@ -1,1 +1,9 @@
-I am buying $NVDA. I am overheating my 3090s. I am programming massively parallel processors. I am taking the cudapill.
+Buy $NVDA.
+
+Overheat the 3090s.
+
+Program massively parallel processors.
+
+Take the cudapill.
+
+![](./img/jensen.jpg)
