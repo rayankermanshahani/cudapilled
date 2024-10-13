@@ -109,7 +109,7 @@ int main(void) {
   CUDA_CHECK(cudaMemcpy(A_d, A_h, N, cudaMemcpyHostToDevice));
   CUDA_CHECK(cudaMemcpy(B_d, B_h, N, cudaMemcpyHostToDevice));
 
-  /* launch config */
+  /* launch config parameters */
   int threadsPerBlock = 256;
   int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
 

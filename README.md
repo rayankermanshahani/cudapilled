@@ -6,4 +6,4 @@ Program massively parallel processors.
 
 Take the cudapill.
 
-![](./img/jensen.jpg)
+![](./images/jensen.jpg)
