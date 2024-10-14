@@ -2,7 +2,7 @@
 NVCC := nvcc
 
 # Compiler flags
-NVCC_FLAGS := -O3 -arch=sm_87
+NVCC_FLAGS := -O3 -arch=sm_70
 
 # Build directory
 BUILD_DIR := build
@@ -30,3 +30,4 @@ clean:
 
 # Phony targets
 .PHONY: all clean
+
