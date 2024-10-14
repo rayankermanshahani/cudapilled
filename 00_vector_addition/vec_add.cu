@@ -106,8 +106,8 @@ int main(void) {
   rand_init(B_h, N);
 
   /* copy operand objects from host to device */
-  CUDA_CHECK(cudaMemcpy(A_d, A_h, N, cudaMemcpyHostToDevice));
-  CUDA_CHECK(cudaMemcpy(B_d, B_h, N, cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpy(A_d, A_h, size, cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpy(B_d, B_h, size, cudaMemcpyHostToDevice));
 
   /* launch config parameters */
   int threadsPerBlock = 256;
@@ -198,7 +198,7 @@ int main(void) {
           avgTime, N);
 
   /* copy result object from device to host */
-  CUDA_CHECK(cudaMemcpy(C_h, C_d, N, cudaMemcpyDeviceToHost));
+  CUDA_CHECK(cudaMemcpy(C_h, C_d, size, cudaMemcpyDeviceToHost));
 
   /* free host memory */
   free(A_h);
