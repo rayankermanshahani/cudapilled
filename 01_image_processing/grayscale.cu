@@ -1,7 +1,7 @@
 // grayscale.cu -- process a color image into grayscale
 
 #define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include "stb_image.h"
 #include "stb_image_write.h"
@@ -12,8 +12,7 @@
 
 #define CUDA_CHECK(err) (cudaCheck(err, __FILE__, __LINE__))
 
-#define IMG_SIZE 1500 * 2000 /* 1500 x 2000 pixels */
-#define CHANNELS 3           /* 3 channels corresponding to RGB */
+#define CHANNELS 3 /* 3 channels corresponding to RGB */
 
 /* function declarations */
 int loadJPGImage(const char *filename, int *width, int *height, int *channels,
@@ -25,15 +24,15 @@ __global__ void grayscaleKernel(unsigned char *Pout, unsigned char *Pin,
                                 int width, int height);
 
 int main(int argc, char **argv) {
-  int y = 450;
-  int x = 400;
+  int width = 400;
+  int height = 450;
   int channels = 3;
 
   const char *file_in = "./imgs/pic.jpg";
   const char *file_out = "./imgs/g_pic.jpg";
 
   /* size of image in 1D array for flattened image in bytes */
-  unsigned int size = IMG_SIZE * sizeof(unsigned char);
+  unsigned int size = (width * height * channels) * sizeof(unsigned char);
 
   /* declare host arrays */
   unsigned char *Pin_h, *Pout_h;
@@ -50,26 +49,27 @@ int main(int argc, char **argv) {
   CUDA_CHECK(cudaMalloc((void **)&Pout_d, size));
 
   /* load JPG image into input host array */
-  if (!loadJPGImage(file_in, &x, &y, &channels, Pin_h)) {
+  if (!loadJPGImage(file_in, &width, &height, &channels, Pin_h)) {
     fprintf(stderr, "loadJPGImage() error:\n");
     exit(EXIT_FAILURE);
   }
 
   /* copy input array from host to device */
-  CUDA_CHECK(cudaMemcpy(Pin_d, Pin_h, IMG_SIZE, cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpy(Pin_d, Pin_h, size, cudaMemcpyHostToDevice));
 
   /* launch config parameters */
   dim3 dimBlock(16, 16, 1);
-  dim3 dimGrid(ceil(x / dimBlock.x), ceil(y / dimBlock.y), 1); /* 25, 29, 1 */
+  dim3 dimGrid(ceil(width / (float)dimBlock.x),
+               ceil(height / (float)dimBlock.y), 1); /* 25, 29, 1 */
 
   /* launch kernel */
-  grayscaleKernel<<<dimGrid, dimBlock>>>(Pout_d, Pin_d, x, y);
+  grayscaleKernel<<<dimGrid, dimBlock>>>(Pout_d, Pin_d, width, height);
   CUDA_CHECK(cudaDeviceSynchronize());
 
   /* copy output array from device to host */
   CUDA_CHECK(cudaMemcpy(Pout_h, Pout_d, size, cudaMemcpyDeviceToHost));
 
-  if (!saveJPGImage(file_out, x, y, channels, Pout_h)) {
+  if (!saveJPGImage(file_out, width, height, channels, Pout_h)) {
     fprintf(stderr, "saveJPGImage() error:\n");
   }
 
@@ -133,15 +133,17 @@ __global__ void grayscaleKernel(unsigned char *Pout, unsigned char *Pin,
   int row = blockIdx.y * blockDim.y + threadIdx.y;
 
   if (col < width && row < height) {
-    /* get 1D offset for the grayscale image */
-    int grayOffset = row * width + col;
-    /* get RGB offsets for the grayscale image */
-    int rgbOffset = grayOffset * CHANNELS;
-    unsigned char r = Pin[rgbOffset];     /* red value */
-    unsigned char g = Pin[rgbOffset + 1]; /* green value */
-    unsigned char b = Pin[rgbOffset + 2]; /* blue value */
+    int i = (row * width + col) * 3; /* account for three channels */
+    unsigned char r = Pin[i];
+    unsigned char g = Pin[i + 1];
+    unsigned char b = Pin[i + 2];
 
-    /* compute luminance from constants */
-    Pout[grayOffset] = 0.21f * r + 0.72f * g + 0.07f * b;
+    /* compute luminance */
+    unsigned char gray = (unsigned char)(0.21f * r + 0.72f * g + 0.07f * b);
+
+    /* write to all channels of output */
+    Pout[i] = gray;
+    Pout[i + 1] = gray;
+    Pout[i + 2] = gray;
   }
 }
