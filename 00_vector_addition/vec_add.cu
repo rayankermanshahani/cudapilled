@@ -210,6 +210,6 @@ int main(void) {
   CUDA_CHECK(cudaFree(B_d));
   CUDA_CHECK(cudaFree(C_d));
 
-  fprintf(stdout, "PROGRAM COMPLETE.\n");
+  fprintf(stdout, "VECTOR ADDITION PROGRAM COMPLETE.\n");
   return 0;
 }

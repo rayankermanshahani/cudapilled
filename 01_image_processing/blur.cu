@@ -24,64 +24,64 @@ __global__ void grayscaleKernel(unsigned char *Pout, unsigned char *Pin,
                                 int width, int height);
 
 int main(int argc, char **argv) {
-  int width = 400;
-  int height = 450;
-  int channels = 3;
-
-  const char *file_in = "./imgs/pic.jpg";
-  const char *file_out = "./imgs/g_pic.jpg";
-
-  /* size of image in 1D array for flattened image in bytes */
-  unsigned int size = (width * height * channels) * sizeof(unsigned char);
-
-  /* declare host arrays */
-  unsigned char *Pin_h, *Pout_h;
-
-  /* declare device arrays */
-  unsigned char *Pin_d, *Pout_d;
-
-  /* allocate memory for host arrays */
-  Pin_h = (unsigned char *)malloc(size);
-  Pout_h = (unsigned char *)malloc(size);
-
-  /* allocate memory for device arrays */
-  CUDA_CHECK(cudaMalloc((void **)&Pin_d, size));
-  CUDA_CHECK(cudaMalloc((void **)&Pout_d, size));
-
-  /* load JPG image into input host array */
-  if (!loadJPGImage(file_in, &width, &height, &channels, Pin_h)) {
-    fprintf(stderr, "loadJPGImage() error:\n");
-    exit(EXIT_FAILURE);
-  }
-
-  /* copy input array from host to device */
-  CUDA_CHECK(cudaMemcpy(Pin_d, Pin_h, size, cudaMemcpyHostToDevice));
-
-  /* launch config parameters */
-  dim3 dimBlock(16, 16, 1);
-  dim3 dimGrid(ceil(width / (float)dimBlock.x),
-               ceil(height / (float)dimBlock.y), 1); /* 25, 29, 1 */
-
-  /* launch kernel */
-  grayscaleKernel<<<dimGrid, dimBlock>>>(Pout_d, Pin_d, width, height);
-  CUDA_CHECK(cudaDeviceSynchronize());
-
-  /* copy output array from device to host */
-  CUDA_CHECK(cudaMemcpy(Pout_h, Pout_d, size, cudaMemcpyDeviceToHost));
-
-  if (!saveJPGImage(file_out, width, height, channels, Pout_h)) {
-    fprintf(stderr, "saveJPGImage() error:\n");
-  }
-
-  /* free host memory */
-  free(Pin_h);
-  free(Pout_h);
-
-  /* free device memory */
-  CUDA_CHECK(cudaFree(Pin_d));
-  CUDA_CHECK(cudaFree(Pout_d));
-
-  fprintf(stdout, "GRAYSCALE PROGRAM COMPLETE\n");
+  //  int width = 400;
+  //  int height = 450;
+  //  int channels = 3;
+  //
+  //  const char *file_in = "./imgs/pic.jpg";
+  //  const char *file_out = "./imgs/g_pic.jpg";
+  //
+  //  /* size of image in 1D array for flattened image in bytes */
+  //  unsigned int size = (width * height * channels) * sizeof(unsigned char);
+  //
+  //  /* declare host arrays */
+  //  unsigned char *Pin_h, *Pout_h;
+  //
+  //  /* declare device arrays */
+  //  unsigned char *Pin_d, *Pout_d;
+  //
+  //  /* allocate memory for host arrays */
+  //  Pin_h = (unsigned char *)malloc(size);
+  //  Pout_h = (unsigned char *)malloc(size);
+  //
+  //  /* allocate memory for device arrays */
+  //  CUDA_CHECK(cudaMalloc((void **)&Pin_d, size));
+  //  CUDA_CHECK(cudaMalloc((void **)&Pout_d, size));
+  //
+  //  /* load JPG image into input host array */
+  //  if (!loadJPGImage(file_in, &width, &height, &channels, Pin_h)) {
+  //    fprintf(stderr, "loadJPGImage() error:\n");
+  //    exit(EXIT_FAILURE);
+  //  }
+  //
+  //  /* copy input array from host to device */
+  //  CUDA_CHECK(cudaMemcpy(Pin_d, Pin_h, size, cudaMemcpyHostToDevice));
+  //
+  //  /* launch config parameters */
+  //  dim3 dimBlock(16, 16, 1);
+  //  dim3 dimGrid(ceil(width / (float)dimBlock.x),
+  //               ceil(height / (float)dimBlock.y), 1); /* 25, 29, 1 */
+  //
+  //  /* launch kernel */
+  //  grayscaleKernel<<<dimGrid, dimBlock>>>(Pout_d, Pin_d, width, height);
+  //  CUDA_CHECK(cudaDeviceSynchronize());
+  //
+  //  /* copy output array from device to host */
+  //  CUDA_CHECK(cudaMemcpy(Pout_h, Pout_d, size, cudaMemcpyDeviceToHost));
+  //
+  //  if (!saveJPGImage(file_out, width, height, channels, Pout_h)) {
+  //    fprintf(stderr, "saveJPGImage() error:\n");
+  //  }
+  //
+  //  /* free host memory */
+  //  free(Pin_h);
+  //  free(Pout_h);
+  //
+  //  /* free device memory */
+  //  CUDA_CHECK(cudaFree(Pin_d));
+  //  CUDA_CHECK(cudaFree(Pout_d));
+  //
+  fprintf(stdout, "BLUR PROGRAM COMPLETE\n");
   return 0;
 }
 
