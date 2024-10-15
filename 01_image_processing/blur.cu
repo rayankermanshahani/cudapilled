@@ -13,6 +13,7 @@
 #define CUDA_CHECK(err) (cudaCheck(err, __FILE__, __LINE__))
 
 #define BLUR_SIZE 3 /* dimension of square patch for blurring */
+#define CHANNELS 3  /* RGB channels */
 
 /* function declarations */
 int loadJPGImage(const char *filename, int *width, int *height, int *channels,
@@ -133,21 +134,28 @@ __global__ void blurKernel(unsigned char *Pin, unsigned char *Pout, int w,
   int row = blockIdx.y * blockDim.y + threadIdx.y;
 
   if (row < h && col < w) {
-    int pixVal = 0;
+    int pixValR = 0, pixValG = 0, pixValB = 0;
     int pixels = 0;
     /* get average of surrounding BLUR_SIZE x BLUR_SIZE patch */
     for (int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE + 1; ++blurCol) {
       for (int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE + 1; ++blurRow) {
         int curRow = row + blurRow;
-        int curCol = row + blurRow;
+        int curCol = col + blurCol;
+
         // verify we have a valid image pixel
         if (curRow >= 0 && curRow < h && curCol >= 0 && curCol < w) {
-          pixVal += Pin[curRow * w + curCol];
+          int idx = (curRow * w + curCol) * CHANNELS;
+          pixValR += Pin[idx];
+          pixValG += Pin[idx + 1];
+          pixValB += Pin[idx + 2];
           ++pixels;
         }
       }
     }
     /* write new pixel to the output image */
-    Pout[row * w + col] = (unsigned char)(pixVal / pixels);
+    int outIdx = (row * w + col) * CHANNELS;
+    Pout[outIdx] = (unsigned char)(pixValR / pixels);
+    Pout[outIdx + 1] = (unsigned char)(pixValG / pixels);
+    Pout[outIdx + 2] = (unsigned char)(pixValB / pixels);
   }
 }
