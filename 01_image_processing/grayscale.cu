@@ -29,8 +29,8 @@ int main(int argc, char **argv) {
   int height = 450;
   int channels = 3;
 
-  const char *file_in = "./imgs/pic.jpg";
-  const char *file_out = "./imgs/g_pic.jpg";
+  const char *file_in = "../images/pic.jpg";
+  const char *file_out = "../images/pic_gray.jpg";
 
   /* bytes in 1D array of (flattened) image */
   unsigned int size = (width * height * channels) * sizeof(unsigned char);
