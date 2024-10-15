@@ -23,6 +23,7 @@ void cudaCheck(cudaError_t err, const char *file, int line);
 __global__ void grayscaleKernel(unsigned char *Pout, unsigned char *Pin,
                                 int width, int height);
 
+/* driver function */
 int main(int argc, char **argv) {
   int width = 400;
   int height = 450;
@@ -31,7 +32,7 @@ int main(int argc, char **argv) {
   const char *file_in = "./imgs/pic.jpg";
   const char *file_out = "./imgs/g_pic.jpg";
 
-  /* size of image in 1D array for flattened image in bytes */
+  /* bytes in 1D array of (flattened) image */
   unsigned int size = (width * height * channels) * sizeof(unsigned char);
 
   /* declare host arrays */
@@ -69,6 +70,7 @@ int main(int argc, char **argv) {
   /* copy output array from device to host */
   CUDA_CHECK(cudaMemcpy(Pout_h, Pout_d, size, cudaMemcpyDeviceToHost));
 
+  /* save output host array into JPG image */
   if (!saveJPGImage(file_out, width, height, channels, Pout_h)) {
     fprintf(stderr, "saveJPGImage() error:\n");
   }
