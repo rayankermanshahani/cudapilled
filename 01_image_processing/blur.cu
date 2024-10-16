@@ -137,8 +137,8 @@ __global__ void blurKernel(unsigned char *Pin, unsigned char *Pout, int w,
     int pixValR = 0, pixValG = 0, pixValB = 0;
     int pixels = 0;
     /* get average of surrounding BLUR_SIZE x BLUR_SIZE patch */
-    for (int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE + 1; ++blurCol) {
-      for (int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE + 1; ++blurRow) {
+    for (int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE + 1; ++blurRow) {
+      for (int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE + 1; ++blurCol) {
         int curRow = row + blurRow;
         int curCol = col + blurCol;
 
