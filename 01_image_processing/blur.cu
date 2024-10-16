@@ -12,7 +12,7 @@
 
 #define CUDA_CHECK(err) (cudaCheck(err, __FILE__, __LINE__))
 
-#define BLUR_SIZE 3 /* dimension of square patch for blurring */
+#define BLUR_SIZE 3 /* number of pixels on each side (radius) of the patch */
 #define CHANNELS 3  /* RGB channels */
 
 /* function declarations */
