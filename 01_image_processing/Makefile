@@ -6,7 +6,6 @@ NVCC_FLAGS := -O3 -arch=sm_70
 
 # Linker flags
 LDFLAGS := -lm -diag-suppress 550
-#
 
 # Build directory
 BUILD_DIR := build
