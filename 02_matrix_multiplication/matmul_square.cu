@@ -5,21 +5,28 @@
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
 
+#define N 1024 /* square matrix width */
 #define CUDA_CHECK(err) (cudaCheck(err, __FILE__, __LINE__))
 
 /* function declarations */
 void cudaCheck(cudaError_t err, const char *file, int line);
 void initMatrix(float *A, int n);
 bool compareMatrices(const float *A, const float *B, int n, float tolerance);
-bool verifyMatmulKernel(void (*kernel)(const float *, const float *, float *,
-                                       int),
-                        int n, float tolerance);
+template <typename KernelFunc>
+bool verifyMatmulKernel(KernelFunc kernel, dim3 gridDim, dim3 blockDim, int n,
+                        float tolerance = 1e-5);
 __global__ void matmulKernel(const float *A, const float *B, float *C, int n);
 
 /* driver function */
 int main(int argc, char **argv) {
+  /* launch config parameters */
+  dim3 blockDim(16, 16, 1);
+  dim3 gridDim(ceil(N / float(blockDim.x)), ceil(N / float(blockDim.y)), 1);
+  bool correct = verifyMatmulKernel(matmulKernel, gridDim, blockDim, N);
+
   fprintf(stdout, "MATRIX MULTIPLICATION PROGRAM COMPLETE\n");
-  return 0;
+
+  return correct ? 0 : 1;
 }
 
 /* cuda error handling */
@@ -49,9 +56,9 @@ bool compareMatrices(const float *A, const float *B, int n, float tolerance) {
 }
 
 /* verify cuda matmul kernel executed correctly */
-bool verifyMatmulKernel(void (*kernel)(const float *, const float *, float *,
-                                       int),
-                        int n, float tolerance = 1e-5) {
+template <typename KernelFunc>
+bool verifyMatmulKernel(KernelFunc kernel, dim3 gridDim, dim3 blockDim, int n,
+                        float tolerance) {
   size_t size = n * n * sizeof(float);
 
   /* declare host matrices */
@@ -80,7 +87,8 @@ bool verifyMatmulKernel(void (*kernel)(const float *, const float *, float *,
   CUDA_CHECK(cudaMemcpy(B_d, B_h, size, cudaMemcpyHostToDevice));
 
   /* launch matmul kernel */
-  kernel(A_d, B_d, C_d, n);
+  kernel<<<gridDim, blockDim>>>(A_d, B_d, C_d, n);
+  CUDA_CHECK(cudaDeviceSynchronize());
 
   /* copy result device matrix to host */
   CUDA_CHECK(cudaMemcpy(C_h_cuda, C_d, size, cudaMemcpyDeviceToHost));
