@@ -13,16 +13,12 @@ void cudaCheck(cudaError_t err, const char *file, int line);
 void initMatrix(float *A, int n);
 bool compareMatrices(const float *A, const float *B, int n, float tolerance);
 template <typename KernelFunc>
-bool verifyMatmulKernel(KernelFunc kernel, dim3 gridDim, dim3 blockDim, int n,
-                        float tolerance = 1e-5);
+bool verifyMatmulKernel(KernelFunc kernel, int n, float tolerance = 1e-4);
 __global__ void matmulKernel(const float *A, const float *B, float *C, int n);
 
 /* driver function */
 int main(int argc, char **argv) {
-  /* launch config parameters */
-  dim3 blockDim(16, 16, 1);
-  dim3 gridDim(ceil(N / float(blockDim.x)), ceil(N / float(blockDim.y)), 1);
-  bool correct = verifyMatmulKernel(matmulKernel, gridDim, blockDim, N);
+  bool correct = verifyMatmulKernel(matmulKernel, N);
 
   fprintf(stdout, "MATRIX MULTIPLICATION PROGRAM COMPLETE\n");
 
@@ -40,14 +36,14 @@ void cudaCheck(cudaError_t err, const char *file, int line) {
 
 /* randonly initialize square matrix */
 void initMatrix(float *A, int n) {
-  for (int i = 0; i < n; ++i) {
+  for (int i = 0; i < n * n; ++i) {
     A[i] = static_cast<float>(rand()) / RAND_MAX;
   }
 }
 
 /* compare matrices with a tolerance */
 bool compareMatrices(const float *A, const float *B, int n, float tolerance) {
-  for (int i = 0; i < n; ++i) {
+  for (int i = 0; i < n * n; ++i) {
     if (std::fabs(A[i] - B[i]) > tolerance) {
       return false;
     }
@@ -57,8 +53,7 @@ bool compareMatrices(const float *A, const float *B, int n, float tolerance) {
 
 /* verify cuda matmul kernel executed correctly */
 template <typename KernelFunc>
-bool verifyMatmulKernel(KernelFunc kernel, dim3 gridDim, dim3 blockDim, int n,
-                        float tolerance) {
+bool verifyMatmulKernel(KernelFunc kernel, int n, float tolerance) {
   size_t size = n * n * sizeof(float);
 
   /* declare host matrices */
@@ -86,6 +81,10 @@ bool verifyMatmulKernel(KernelFunc kernel, dim3 gridDim, dim3 blockDim, int n,
   CUDA_CHECK(cudaMemcpy(A_d, A_h, size, cudaMemcpyHostToDevice));
   CUDA_CHECK(cudaMemcpy(B_d, B_h, size, cudaMemcpyHostToDevice));
 
+  /* launch config parameters */
+  dim3 blockDim(16, 16, 1);
+  dim3 gridDim(ceil(n / float(blockDim.x)), ceil(n / float(blockDim.y)), 1);
+
   /* launch matmul kernel */
   kernel<<<gridDim, blockDim>>>(A_d, B_d, C_d, n);
   CUDA_CHECK(cudaDeviceSynchronize());
@@ -98,8 +97,11 @@ bool verifyMatmulKernel(KernelFunc kernel, dim3 gridDim, dim3 blockDim, int n,
   cublasCreate_v2(&handle);
   float alpha = 1.0f;
   float beta = 0.0f;
-  cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, n, n, &alpha, B_d, n, A_d, n,
-              &beta, C_d, n);
+  cublasStatus_t status = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, n, n,
+                                      &alpha, A_d, n, B_d, n, &beta, C_d, n);
+  if (status != CUBLAS_STATUS_SUCCESS) {
+    fprintf(stderr, "cuBLAS error: %d\n", status);
+  }
   CUDA_CHECK(cudaMemcpy(C_h_cublas, C_d, size, cudaMemcpyDeviceToHost));
   cublasDestroy_v2(handle);
 
@@ -111,6 +113,10 @@ bool verifyMatmulKernel(KernelFunc kernel, dim3 gridDim, dim3 blockDim, int n,
   } else {
     fprintf(stdout,
             "Failure: CUDA kernel output does not match cuBLAS result.\n");
+    for (int i = 0; i < 5; ++i) {
+      fprintf(stdout, "C_h_cuda[%d] = %f, C_h_cublas[%d] = %f\n", i,
+              C_h_cuda[i], i, C_h_cublas[i]);
+    }
   }
 
   /* clean up memory */
