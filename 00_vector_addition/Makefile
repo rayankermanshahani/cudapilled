@@ -4,6 +4,9 @@ NVCC := nvcc
 # Compiler flags
 NVCC_FLAGS := -O3 -arch=sm_87
 
+# Linker flags
+LDFLAGS := -lm
+
 # Build directory
 BUILD_DIR := build
 
@@ -22,7 +25,7 @@ $(BUILD_DIR):
 
 # Rule to create executables
 $(BUILD_DIR)/%: %.cu
-	$(NVCC) $(NVCC_FLAGS) $< -o $@
+	$(NVCC) $(NVCC_FLAGS) $< -o $@ $(LDFLAGS)
 
 # Clean target
 clean:

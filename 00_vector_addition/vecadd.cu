@@ -48,7 +48,7 @@ int main(void) {
   cudaCheckError(cudaDeviceSynchronize());
 
   // copy output array from device to host
-  cudaCheckError(cudaMemcpy(c_h, c_h, size, cudaMemcpyDeviceToHost));
+  cudaCheckError(cudaMemcpy(c_h, c_d, size, cudaMemcpyDeviceToHost));
 
   // verify result
   for (int i = 0; i < 5; ++i) {
