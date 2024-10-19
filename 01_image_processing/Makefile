@@ -2,7 +2,7 @@
 NVCC := nvcc
 
 # Compiler flags
-NVCC_FLAGS := -O3 -arch=sm_70
+NVCC_FLAGS := -O3 -arch=sm_86
 
 # Linker flags
 LDFLAGS := -lm -diag-suppress 550
