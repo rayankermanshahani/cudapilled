@@ -1,4 +1,4 @@
-#include <cuda.h>
+#include <cuda_runtime.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,62 +7,79 @@
 #define N 100000000 // number of array elements
 #define THREADS_PER_BLOCK 256
 
+#define CUDA_CHECK(err) cudaCheck(err, __FILE__, __LINE__)
+
 /* function declarations */
 __global__ void vecAdd(const float *a, const float *b, float *c, int n);
 __global__ void vecAddAdj(const float *a, const float *b, float *c, int n);
 __global__ void vecAddSec(const float *a, const float *b, float *c, int n);
 void initRand(float *a, int n);
-void checkCudaError(cudaError_t err, const char *file, int line);
-
-#define cudaCheckError(err) checkCudaError(err, __FILE__, __LINE__);
+void cudaCheck(cudaError_t err, const char *file, int line);
 
 /* driver program */
 int main(void) {
-  srand(time(NULL));               // initialize rng
-  float *a_h, *b_h, *c_h;          // host arrays
-  float *a_d, *b_d, *c_d;          // device arrays
-  size_t size = N * sizeof(float); // array size in bytes
+  srand(time(NULL));                          // initialize rng
+  float *a_h, *b_h, *c_h, *c_h_adj, *c_h_sec; // host arrays
+  float *a_d, *b_d, *c_d;                     // device arrays
+  size_t size = N * sizeof(float);            // array size in bytes
 
   // allocate host memory
   a_h = (float *)malloc(size);
   b_h = (float *)malloc(size);
   c_h = (float *)malloc(size);
+  c_h_adj = (float *)malloc(size);
+  c_h_sec = (float *)malloc(size);
 
   // allocate device memory
-  cudaCheckError(cudaMalloc(&a_d, size));
-  cudaCheckError(cudaMalloc(&b_d, size));
-  cudaCheckError(cudaMalloc(&c_d, size));
+  CUDA_CHECK(cudaMalloc(&a_d, size));
+  CUDA_CHECK(cudaMalloc(&b_d, size));
+  CUDA_CHECK(cudaMalloc(&c_d, size));
 
   // init input host arrays
   initRand(a_h, N);
   initRand(b_h, N);
 
   // copy input arrays from host to device
-  cudaCheckError(cudaMemcpy(a_d, a_h, size, cudaMemcpyHostToDevice));
-  cudaCheckError(cudaMemcpy(b_d, b_h, size, cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpy(a_d, a_h, size, cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpy(b_d, b_h, size, cudaMemcpyHostToDevice));
 
-  // launch kernel
+  // launch kernel for simple vector addition
   dim3 threadsPerBlock(THREADS_PER_BLOCK, 1, 1);
   dim3 blocksPerGrid(ceil(N / float(threadsPerBlock.x)), 1, 1);
   vecAdd<<<blocksPerGrid, threadsPerBlock>>>(a_d, b_d, c_d, N);
-  cudaCheckError(cudaDeviceSynchronize());
-
+  CUDA_CHECK(cudaGetLastError());
+  CUDA_CHECK(cudaDeviceSynchronize());
   // copy output array from device to host
-  cudaCheckError(cudaMemcpy(c_h, c_d, size, cudaMemcpyDeviceToHost));
+  CUDA_CHECK(cudaMemcpy(c_h, c_d, size, cudaMemcpyDeviceToHost));
+
+  // launch kernel that processes adjacent array elements
+  vecAddAdj<<<blocksPerGrid, threadsPerBlock>>>(a_d, b_d, c_d, N);
+  CUDA_CHECK(cudaGetLastError());
+  CUDA_CHECK(cudaDeviceSynchronize());
+  CUDA_CHECK(cudaMemcpy(c_h_adj, c_d, size, cudaMemcpyDeviceToHost));
+
+  // launch kernel that processes adjacent array sections
+  vecAddSec<<<blocksPerGrid, threadsPerBlock>>>(a_d, b_d, c_d, N);
+  CUDA_CHECK(cudaGetLastError());
+  CUDA_CHECK(cudaDeviceSynchronize());
+  CUDA_CHECK(cudaMemcpy(c_h_sec, c_d, size, cudaMemcpyDeviceToHost));
 
   // verify result
   for (int i = 0; i < 5; ++i) {
-    printf("a[%d] = %f, b[%d] = %f, c[%d] = %f\n", i, a_h[i], i, b_h[i], i,
-           c_h[i]);
+    printf(
+        "a[%d] = %f, b[%d] = %f, c[%d] = %f, c_adj[%d] = %f, c_sec[%d] = %f\n",
+        i, a_h[i], i, b_h[i], i, c_h[i], i, c_h_adj[i], i, c_h_sec[i]);
   }
 
   // clean up memory
   free(a_h);
   free(b_h);
   free(c_h);
-  cudaCheckError(cudaFree(a_d));
-  cudaCheckError(cudaFree(b_d));
-  cudaCheckError(cudaFree(c_d));
+  free(c_h_adj);
+  free(c_h_sec);
+  CUDA_CHECK(cudaFree(a_d));
+  CUDA_CHECK(cudaFree(b_d));
+  CUDA_CHECK(cudaFree(c_d));
 
   fprintf(stdout, "VECTOR ADDITION PROGRAM COMPLETE.\n");
   return 0;
@@ -113,7 +130,7 @@ void initRand(float *a, int n) {
 }
 
 /* cuda error handling */
-void checkCudaError(cudaError_t err, const char *file, int line) {
+void cudaCheck(cudaError_t err, const char *file, int line) {
   if (err != cudaSuccess) {
     printf("%s in %s at line %d\n", cudaGetErrorString(err), file, line);
     exit(EXIT_FAILURE);
