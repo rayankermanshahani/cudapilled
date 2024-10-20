@@ -26,7 +26,7 @@ int main(void) {
   A_h = (float *)malloc(size);
   B_h = (float *)malloc(size);
   C_h = (float *)malloc(size);
-  C_cpu = (float *)malloc(size);
+  C_cpu = (float *)calloc(N * N, sizeof(float));
 
   // allocate device memory
   CUDA_CHECK(cudaMalloc(&A_d, size));
@@ -34,30 +34,25 @@ int main(void) {
   CUDA_CHECK(cudaMalloc(&C_d, size));
 
   // init input host arrays
-  printf("Initializing A and B on host...\n"); // TODO: diagnostic prints
   initRand(A_h, N);
   initRand(B_h, N);
 
   // copy input arrays from host to device
-  printf("Copying A and B from host to device...\n"); // TODO: diagnostic prints
   CUDA_CHECK(cudaMemcpy(A_d, A_h, size, cudaMemcpyHostToDevice));
   CUDA_CHECK(cudaMemcpy(B_d, B_h, size, cudaMemcpyHostToDevice));
 
-  // launch kernel for simple vector addition
-  printf("Computing matmul on GPU...\n"); // TODO: diagnostic prints
+  // launch kernel for matmul on gpu
   dim3 threadsPerBlock(THREADS_PER_BLOCK, 1, 1);
   dim3 blocksPerGrid(ceil(N / float(threadsPerBlock.x)), 1, 1);
   matMul<<<blocksPerGrid, threadsPerBlock>>>(A_d, B_d, C_d, N);
   CUDA_CHECK(cudaGetLastError());
   CUDA_CHECK(cudaDeviceSynchronize());
-  printf("Matmul on GPU complete.\n"); // TODO: diagnostic prints
 
   // copy output array from device to host
   CUDA_CHECK(cudaMemcpy(C_h, C_d, size, cudaMemcpyDeviceToHost));
 
-  printf("Computing matmul on CPU...\n"); // TODO: diagnostic prints
+  // launch kernel for matmul on cpu
   cpuMatMul(A_h, B_h, C_cpu, N);
-  printf("Matmul on CPU complete.\n"); // TODO: diagnostic prints
 
   // verify result
   for (int i = 0; i < 5; ++i) {
@@ -65,7 +60,6 @@ int main(void) {
   }
 
   // clean up memory
-  printf("Cleaning up memory...\n"); // TODO: diagnostic prints
   free(A_h);
   free(B_h);
   free(C_h);
@@ -74,7 +68,7 @@ int main(void) {
   CUDA_CHECK(cudaFree(B_d));
   CUDA_CHECK(cudaFree(C_d));
 
-  fprintf(stdout, "VECTOR ADDITION PROGRAM COMPLETE.\n");
+  fprintf(stdout, "MATRIX MULTIPLICATION PROGRAM COMPLETE.\n");
   return 0;
 }
 
@@ -97,7 +91,7 @@ void cpuMatMul(const float *A, const float *B, float *C, int n) {
   for (int i = 0; i < n; ++i) {     // i-th row of A
     for (int j = 0; j < n; ++j) {   // j-th col of B
       for (int k = 0; k < n; ++k) { // k-th element of corresponding row and col
-        C[i * n + j] += A[i * n + k] + B[k * n + j];
+        C[i * n + j] += A[i * n + k] * B[k * n + j];
       }
     }
   }
