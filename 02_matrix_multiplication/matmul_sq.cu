@@ -72,7 +72,7 @@ int main(void) {
   return 0;
 }
 
-/* matrix multiplication */
+/* matrix multiplication kernel */
 __global__ void matMul(const float *A, const float *B, float *C, int n) {
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
