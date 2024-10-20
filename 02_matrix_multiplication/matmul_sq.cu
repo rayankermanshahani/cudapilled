@@ -26,7 +26,7 @@ int main(void) {
   A_h = (float *)malloc(size);
   B_h = (float *)malloc(size);
   C_h = (float *)malloc(size);
-  C_cpu = (float *)calloc(N * N, sizeof(float));
+  C_cpu = (float *)malloc(size);
 
   // allocate device memory
   CUDA_CHECK(cudaMalloc(&A_d, size));
