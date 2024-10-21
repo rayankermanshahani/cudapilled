@@ -1,5 +1,4 @@
 #include <cuda_runtime.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -14,7 +13,7 @@ __global__ void matMul(const float *A, const float *B, float *C, int n);
 __global__ void matMulRow(const float *A, const float *B, float *C, int n);
 __global__ void matMulCol(const float *A, const float *B, float *C, int n);
 void cpuMatMul(const float *A, const float *B, float *C, int n);
-void initRand(float *A, int n);
+void initMatRand(float *A, int n);
 void cudaCheck(cudaError_t err, const char *file, int line);
 
 /* driver program */
@@ -38,8 +37,8 @@ int main(void) {
   CUDA_CHECK(cudaMalloc(&C_d, size));
 
   // init input host arrays
-  initRand(A_h, N);
-  initRand(B_h, N);
+  initMatRand(A_h, N);
+  initMatRand(B_h, N);
 
   // copy input arrays from host to device
   CUDA_CHECK(cudaMemcpy(A_d, A_h, size, cudaMemcpyHostToDevice));
@@ -156,9 +155,9 @@ void cpuMatMul(const float *A, const float *B, float *C, int n) {
   }
 }
 
-/* randomly initalize float array */
-void initRand(float *a, int n) {
-  for (int i = 0; i < n; ++i) {
+/* randomly initalize float array for square matrix */
+void initMatRand(float *a, int n) {
+  for (int i = 0; i < n * n; ++i) { // square matrix
     a[i] = (float)rand() / (float)RAND_MAX;
   }
 }
