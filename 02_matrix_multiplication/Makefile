@@ -5,7 +5,7 @@ NVCC := nvcc
 NVCC_FLAGS := -O3 -arch=native
 
 # Linker flags
-LDFLAGS := -lm
+LDFLAGS :=
 
 # Build directory
 BUILD_DIR := build
