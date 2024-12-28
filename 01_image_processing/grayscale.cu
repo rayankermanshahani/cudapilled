@@ -15,22 +15,22 @@
 #define CHANNELS 3 /* RGB channels */
 
 /* function declarations */
-int loadJPGImage(const char *filename, int *width, int *height, int *channels,
-                 unsigned char *P);
-int saveJPGImage(const char *filename, int width, int height, int channels,
-                 const unsigned char *P);
-void cudaCheck(cudaError_t err, const char *file, int line);
-__global__ void grayscaleKernel(unsigned char *Pout, unsigned char *Pin,
+int loadJPGImage(const char* filename, int* width, int* height, int* channels,
+                 unsigned char* P);
+int saveJPGImage(const char* filename, int width, int height, int channels,
+                 const unsigned char* P);
+void cudaCheck(cudaError_t err, const char* file, int line);
+__global__ void grayscaleKernel(unsigned char* Pout, unsigned char* Pin,
                                 int width, int height);
 
 /* driver function */
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   int width = 400;
   int height = 450;
   int channels = 3;
 
-  const char *file_in = "../images/pic.jpg";
-  const char *file_out = "../images/pic_gray.jpg";
+  const char* file_in = "../images/pic.jpg";
+  const char* file_out = "../images/pic_gray.jpg";
 
   /* bytes in 1D array of (flattened) image */
   unsigned int size = (width * height * channels) * sizeof(unsigned char);
@@ -42,12 +42,12 @@ int main(int argc, char **argv) {
   unsigned char *Pin_d, *Pout_d;
 
   /* allocate memory for host arrays */
-  Pin_h = (unsigned char *)malloc(size);
-  Pout_h = (unsigned char *)malloc(size);
+  Pin_h = (unsigned char*) malloc(size);
+  Pout_h = (unsigned char*) malloc(size);
 
   /* allocate memory for device arrays */
-  CUDA_CHECK(cudaMalloc((void **)&Pin_d, size));
-  CUDA_CHECK(cudaMalloc((void **)&Pout_d, size));
+  CUDA_CHECK(cudaMalloc((void**) &Pin_d, size));
+  CUDA_CHECK(cudaMalloc((void**) &Pout_d, size));
 
   /* load JPG image into input host array */
   if (!loadJPGImage(file_in, &width, &height, &channels, Pin_h)) {
@@ -60,8 +60,8 @@ int main(int argc, char **argv) {
 
   /* launch config parameters */
   dim3 dimBlock(16, 16, 1);
-  dim3 dimGrid(ceil(width / (float)dimBlock.x),
-               ceil(height / (float)dimBlock.y), 1); /* 25, 29, 1 */
+  dim3 dimGrid(ceil(width / (float) dimBlock.x),
+               ceil(height / (float) dimBlock.y), 1); /* 25, 29, 1 */
 
   /* launch kernel */
   grayscaleKernel<<<dimGrid, dimBlock>>>(Pout_d, Pin_d, width, height);
@@ -88,10 +88,10 @@ int main(int argc, char **argv) {
 }
 
 /* load jpg image from specified filepath into array */
-int loadJPGImage(const char *filename, int *width, int *height, int *channels,
-                 unsigned char *P) {
+int loadJPGImage(const char* filename, int* width, int* height, int* channels,
+                 unsigned char* P) {
   /* load jpg image via stbi */
-  unsigned char *data = stbi_load(filename, width, height, channels, 0);
+  unsigned char* data = stbi_load(filename, width, height, channels, 0);
 
   /* error handling */
   if (data == NULL) {
@@ -108,8 +108,8 @@ int loadJPGImage(const char *filename, int *width, int *height, int *channels,
 }
 
 /* save array as jpg image at specified filepath */
-int saveJPGImage(const char *filename, int width, int height, int channels,
-                 const unsigned char *P) {
+int saveJPGImage(const char* filename, int width, int height, int channels,
+                 const unsigned char* P) {
   int result = stbi_write_jpg(filename, width, height, channels, P, 100);
   if (result == 0) {
     fprintf(stderr, "Failed to save image to %s\n", filename);
@@ -119,7 +119,7 @@ int saveJPGImage(const char *filename, int width, int height, int channels,
 }
 
 /* cuda error handling */
-void cudaCheck(cudaError_t err, const char *file, int line) {
+void cudaCheck(cudaError_t err, const char* file, int line) {
   if (err != cudaSuccess) {
     fprintf(stderr, "[CUDA ERROR] at file %s:%d\n%s\n", file, line,
             cudaGetErrorString(err));
@@ -128,7 +128,7 @@ void cudaCheck(cudaError_t err, const char *file, int line) {
 }
 
 /* convert an rgb image to grayscale */
-__global__ void grayscaleKernel(unsigned char *Pout, unsigned char *Pin,
+__global__ void grayscaleKernel(unsigned char* Pout, unsigned char* Pin,
                                 int width, int height) {
   int col = blockIdx.x * blockDim.x + threadIdx.x;
   int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -140,7 +140,7 @@ __global__ void grayscaleKernel(unsigned char *Pout, unsigned char *Pin,
     unsigned char b = Pin[i + 2];
 
     /* compute luminance */
-    unsigned char gray = (unsigned char)(0.21f * r + 0.72f * g + 0.07f * b);
+    unsigned char gray = (unsigned char) (0.21f * r + 0.72f * g + 0.07f * b);
 
     /* write to all channels of output */
     Pout[i] = gray;

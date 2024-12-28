@@ -9,12 +9,12 @@
 #define CUDA_CHECK(err) cudaCheck(err, __FILE__, __LINE__)
 
 /* function declarations */
-__global__ void matMul(const float *A, const float *B, float *C, int n);
-__global__ void matMulRow(const float *A, const float *B, float *C, int n);
-__global__ void matMulCol(const float *A, const float *B, float *C, int n);
-void cpuMatMul(const float *A, const float *B, float *C, int n);
-void initMatRand(float *A, int n);
-void cudaCheck(cudaError_t err, const char *file, int line);
+__global__ void matMul(const float* A, const float* B, float* C, int n);
+__global__ void matMulRow(const float* A, const float* B, float* C, int n);
+__global__ void matMulCol(const float* A, const float* B, float* C, int n);
+void cpuMatMul(const float* A, const float* B, float* C, int n);
+void initMatRand(float* A, int n);
+void cudaCheck(cudaError_t err, const char* file, int line);
 
 /* driver program */
 int main(void) {
@@ -24,12 +24,12 @@ int main(void) {
   size_t size = N * N * sizeof(float);                // array size in bytes
 
   // allocate host memory
-  A_h = (float *)malloc(size);
-  B_h = (float *)malloc(size);
-  C_h = (float *)malloc(size);
-  C_h_row = (float *)malloc(size);
-  C_h_col = (float *)malloc(size);
-  C_cpu = (float *)malloc(size);
+  A_h = (float*) malloc(size);
+  B_h = (float*) malloc(size);
+  C_h = (float*) malloc(size);
+  C_h_row = (float*) malloc(size);
+  C_h_col = (float*) malloc(size);
+  C_cpu = (float*) malloc(size);
 
   // allocate device memory
   CUDA_CHECK(cudaMalloc(&A_d, size));
@@ -99,7 +99,7 @@ int main(void) {
 }
 
 /* matrix multiplication kernel */
-__global__ void matMul(const float *A, const float *B, float *C, int n) {
+__global__ void matMul(const float* A, const float* B, float* C, int n) {
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -113,7 +113,7 @@ __global__ void matMul(const float *A, const float *B, float *C, int n) {
 }
 
 /* matrix multiplication: each thread corresponds to an output row */
-__global__ void matMulRow(const float *A, const float *B, float *C, int n) {
+__global__ void matMulRow(const float* A, const float* B, float* C, int n) {
   int row = blockIdx.x * blockDim.x + threadIdx.x;
 
   if (row < n) {
@@ -128,7 +128,7 @@ __global__ void matMulRow(const float *A, const float *B, float *C, int n) {
 }
 
 /* matrix multiplication: each thread corresponds to an output column */
-__global__ void matMulCol(const float *A, const float *B, float *C, int n) {
+__global__ void matMulCol(const float* A, const float* B, float* C, int n) {
   int col = blockIdx.x * blockDim.x + threadIdx.x;
 
   if (col < n) {
@@ -143,7 +143,7 @@ __global__ void matMulCol(const float *A, const float *B, float *C, int n) {
 }
 
 /* matrix multiplication on the cpu */
-void cpuMatMul(const float *A, const float *B, float *C, int n) {
+void cpuMatMul(const float* A, const float* B, float* C, int n) {
   for (int i = 0; i < n; ++i) {   // i-th row of A
     for (int j = 0; j < n; ++j) { // j-th col of B
       float acc = 0.0f;
@@ -156,14 +156,14 @@ void cpuMatMul(const float *A, const float *B, float *C, int n) {
 }
 
 /* randomly initalize float array for square matrix */
-void initMatRand(float *a, int n) {
+void initMatRand(float* a, int n) {
   for (int i = 0; i < n * n; ++i) { // square matrix
-    a[i] = (float)rand() / (float)RAND_MAX;
+    a[i] = (float) rand() / (float) RAND_MAX;
   }
 }
 
 /* cuda error handling */
-void cudaCheck(cudaError_t err, const char *file, int line) {
+void cudaCheck(cudaError_t err, const char* file, int line) {
   if (err != cudaSuccess) {
     printf("%s in %s at line %d\n", cudaGetErrorString(err), file, line);
     exit(EXIT_FAILURE);

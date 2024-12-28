@@ -16,21 +16,21 @@
 #define CHANNELS 3  /* RGB channels */
 
 /* function declarations */
-int loadJPGImage(const char *filename, int *width, int *height, int *channels,
-                 unsigned char *P);
-int saveJPGImage(const char *filename, int width, int height, int channels,
-                 const unsigned char *P);
-void cudaCheck(cudaError_t err, const char *file, int line);
-__global__ void blurKernel(unsigned char *in, unsigned char *out, int w, int h);
+int loadJPGImage(const char* filename, int* width, int* height, int* channels,
+                 unsigned char* P);
+int saveJPGImage(const char* filename, int width, int height, int channels,
+                 const unsigned char* P);
+void cudaCheck(cudaError_t err, const char* file, int line);
+__global__ void blurKernel(unsigned char* in, unsigned char* out, int w, int h);
 
 /* driver function */
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   int width = 400;
   int height = 450;
   int channels = 3;
 
-  const char *file_in = "../images/pic.jpg";
-  const char *file_out = "../images/pic_blur.jpg";
+  const char* file_in = "../images/pic.jpg";
+  const char* file_out = "../images/pic_blur.jpg";
 
   /* bytes in 1D array of (flattened) image */
   unsigned int size = (width * height * channels) * sizeof(unsigned char);
@@ -42,12 +42,12 @@ int main(int argc, char **argv) {
   unsigned char *Pin_d, *Pout_d;
 
   /* allocate memory for host arrays */
-  Pin_h = (unsigned char *)malloc(size);
-  Pout_h = (unsigned char *)malloc(size);
+  Pin_h = (unsigned char*) malloc(size);
+  Pout_h = (unsigned char*) malloc(size);
 
   /* allocate memory for host arrays */
-  CUDA_CHECK(cudaMalloc((void **)&Pin_d, size));
-  CUDA_CHECK(cudaMalloc((void **)&Pout_d, size));
+  CUDA_CHECK(cudaMalloc((void**) &Pin_d, size));
+  CUDA_CHECK(cudaMalloc((void**) &Pout_d, size));
 
   /* load JPG image into input host array */
   if (!loadJPGImage(file_in, &width, &height, &channels, Pin_h)) {
@@ -60,8 +60,8 @@ int main(int argc, char **argv) {
 
   /* launch config parameters */
   dim3 dimBlock(16, 16, 1);
-  dim3 dimGrid(ceil(width / (float)dimBlock.x),
-               ceil(height / (float)dimBlock.y), 1);
+  dim3 dimGrid(ceil(width / (float) dimBlock.x),
+               ceil(height / (float) dimBlock.y), 1);
 
   /* launch kernel */
   blurKernel<<<dimGrid, dimBlock>>>(Pin_d, Pout_d, width, height);
@@ -88,10 +88,10 @@ int main(int argc, char **argv) {
 }
 
 /* load jpg image from specified filepath into array */
-int loadJPGImage(const char *filename, int *width, int *height, int *channels,
-                 unsigned char *P) {
+int loadJPGImage(const char* filename, int* width, int* height, int* channels,
+                 unsigned char* P) {
   /* load jpg image via stbi */
-  unsigned char *data = stbi_load(filename, width, height, channels, 0);
+  unsigned char* data = stbi_load(filename, width, height, channels, 0);
 
   /* error handling */
   if (data == NULL) {
@@ -108,8 +108,8 @@ int loadJPGImage(const char *filename, int *width, int *height, int *channels,
 }
 
 /* save array as jpg image at specified filepath */
-int saveJPGImage(const char *filename, int width, int height, int channels,
-                 const unsigned char *P) {
+int saveJPGImage(const char* filename, int width, int height, int channels,
+                 const unsigned char* P) {
   int result = stbi_write_jpg(filename, width, height, channels, P, 100);
   if (result == 0) {
     fprintf(stderr, "Failed to save image to %s\n", filename);
@@ -119,7 +119,7 @@ int saveJPGImage(const char *filename, int width, int height, int channels,
 }
 
 /* cuda error handling */
-void cudaCheck(cudaError_t err, const char *file, int line) {
+void cudaCheck(cudaError_t err, const char* file, int line) {
   if (err != cudaSuccess) {
     fprintf(stderr, "[CUDA ERROR] at file %s:%d\n%s\n", file, line,
             cudaGetErrorString(err));
@@ -128,7 +128,7 @@ void cudaCheck(cudaError_t err, const char *file, int line) {
 }
 
 /* blur an image */
-__global__ void blurKernel(unsigned char *Pin, unsigned char *Pout, int w,
+__global__ void blurKernel(unsigned char* Pin, unsigned char* Pout, int w,
                            int h) {
   int col = blockIdx.x * blockDim.x + threadIdx.x;
   int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -154,8 +154,8 @@ __global__ void blurKernel(unsigned char *Pin, unsigned char *Pout, int w,
     }
     /* write new pixel to the output image */
     int outIdx = (row * w + col) * CHANNELS;
-    Pout[outIdx] = (unsigned char)(pixValR / pixels);
-    Pout[outIdx + 1] = (unsigned char)(pixValG / pixels);
-    Pout[outIdx + 2] = (unsigned char)(pixValB / pixels);
+    Pout[outIdx] = (unsigned char) (pixValR / pixels);
+    Pout[outIdx + 1] = (unsigned char) (pixValG / pixels);
+    Pout[outIdx + 2] = (unsigned char) (pixValB / pixels);
   }
 }

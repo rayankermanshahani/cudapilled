@@ -9,11 +9,11 @@
 #define CUDA_CHECK(err) cudaCheck(err, __FILE__, __LINE__)
 
 /* function declarations */
-__global__ void matVecProd(const float *A, const float *b, float *c, int n);
-void cpuMatVecProd(const float *A, const float *b, float *c, int n);
-void initMatRand(float *A, int n);
-void initVecRand(float *a, int n);
-void cudaCheck(cudaError_t err, const char *file, int line);
+__global__ void matVecProd(const float* A, const float* b, float* c, int n);
+void cpuMatVecProd(const float* A, const float* b, float* c, int n);
+void initMatRand(float* A, int n);
+void initVecRand(float* a, int n);
+void cudaCheck(cudaError_t err, const char* file, int line);
 
 /* driver program */
 int main(void) {
@@ -24,10 +24,10 @@ int main(void) {
   size_t vec_sz = N * sizeof(float);     // vector array size in bytes
 
   // allocate host memory
-  A_h = (float *)malloc(mat_sz);
-  b_h = (float *)malloc(vec_sz);
-  c_h = (float *)malloc(vec_sz);
-  c_cpu = (float *)malloc(vec_sz);
+  A_h = (float*) malloc(mat_sz);
+  b_h = (float*) malloc(vec_sz);
+  c_h = (float*) malloc(vec_sz);
+  c_cpu = (float*) malloc(vec_sz);
 
   // allocate device memory
   CUDA_CHECK(cudaMalloc(&A_d, mat_sz));
@@ -74,7 +74,7 @@ int main(void) {
 }
 
 /* matrix-vector product */
-__global__ void matVecProd(const float *A, const float *b, float *c, int n) {
+__global__ void matVecProd(const float* A, const float* b, float* c, int n) {
   int row = blockIdx.x * blockDim.x + threadIdx.x;
 
   if (row < n) {
@@ -87,7 +87,7 @@ __global__ void matVecProd(const float *A, const float *b, float *c, int n) {
 }
 
 /* matrix vector product on the cpu */
-void cpuMatVecProd(const float *A, const float *b, float *c, int n) {
+void cpuMatVecProd(const float* A, const float* b, float* c, int n) {
   for (int i = 0; i < n; ++i) { // i-th row of A
     float acc = 0.0;
     for (int j = 0; j < n; ++j) {
@@ -98,21 +98,21 @@ void cpuMatVecProd(const float *A, const float *b, float *c, int n) {
 }
 
 /* randomly initalize float array for square matrix */
-void initMatRand(float *A, int n) {
+void initMatRand(float* A, int n) {
   for (int i = 0; i < n * n; ++i) {
-    A[i] = (float)rand() / (float)RAND_MAX;
+    A[i] = (float) rand() / (float) RAND_MAX;
   }
 }
 
 /* randomly initalize float array for vector */
-void initVecRand(float *a, int n) {
+void initVecRand(float* a, int n) {
   for (int i = 0; i < n; ++i) {
-    a[i] = (float)rand() / (float)RAND_MAX;
+    a[i] = (float) rand() / (float) RAND_MAX;
   }
 }
 
 /* cuda error handling */
-void cudaCheck(cudaError_t err, const char *file, int line) {
+void cudaCheck(cudaError_t err, const char* file, int line) {
   if (err != cudaSuccess) {
     printf("%s in %s at line %d\n", cudaGetErrorString(err), file, line);
     exit(EXIT_FAILURE);

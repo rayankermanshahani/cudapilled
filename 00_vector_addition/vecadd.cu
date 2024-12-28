@@ -10,11 +10,11 @@
 #define CUDA_CHECK(err) cudaCheck(err, __FILE__, __LINE__)
 
 /* function declarations */
-__global__ void vecAdd(const float *a, const float *b, float *c, int n);
-__global__ void vecAddAdj(const float *a, const float *b, float *c, int n);
-__global__ void vecAddSec(const float *a, const float *b, float *c, int n);
-void initRand(float *a, int n);
-void cudaCheck(cudaError_t err, const char *file, int line);
+__global__ void vecAdd(const float* a, const float* b, float* c, int n);
+__global__ void vecAddAdj(const float* a, const float* b, float* c, int n);
+__global__ void vecAddSec(const float* a, const float* b, float* c, int n);
+void initRand(float* a, int n);
+void cudaCheck(cudaError_t err, const char* file, int line);
 
 /* driver program */
 int main(void) {
@@ -24,11 +24,11 @@ int main(void) {
   size_t size = N * sizeof(float);            // array size in bytes
 
   // allocate host memory
-  a_h = (float *)malloc(size);
-  b_h = (float *)malloc(size);
-  c_h = (float *)malloc(size);
-  c_h_adj = (float *)malloc(size);
-  c_h_sec = (float *)malloc(size);
+  a_h = (float*) malloc(size);
+  b_h = (float*) malloc(size);
+  c_h = (float*) malloc(size);
+  c_h_adj = (float*) malloc(size);
+  c_h_sec = (float*) malloc(size);
 
   // allocate device memory
   CUDA_CHECK(cudaMalloc(&a_d, size));
@@ -86,7 +86,7 @@ int main(void) {
 }
 
 /* vector addition: each thread processes one output element */
-__global__ void vecAdd(const float *a, const float *b, float *c, int n) {
+__global__ void vecAdd(const float* a, const float* b, float* c, int n) {
   int i = blockDim.x * blockIdx.x + threadIdx.x;
 
   if (i < n) {
@@ -95,7 +95,7 @@ __global__ void vecAdd(const float *a, const float *b, float *c, int n) {
 }
 
 /* vector addition kernel: each thread processes two adjacent array elements */
-__global__ void vecAddAdj(const float *a, const float *b, float *c, int n) {
+__global__ void vecAddAdj(const float* a, const float* b, float* c, int n) {
   int i = (blockDim.x * blockIdx.x + threadIdx.x) * 2;
 
   if (i < n) { // first adjacent element
@@ -108,7 +108,7 @@ __global__ void vecAddAdj(const float *a, const float *b, float *c, int n) {
 }
 
 /* vector addition: each thread processes two sections of the input arrays */
-__global__ void vecAddSec(const float *a, const float *b, float *c, int n) {
+__global__ void vecAddSec(const float* a, const float* b, float* c, int n) {
   unsigned i = (blockDim.x * blockIdx.x * 2) +
                threadIdx.x; // each section is separated by blockDim.x elements
 
@@ -123,14 +123,14 @@ __global__ void vecAddSec(const float *a, const float *b, float *c, int n) {
 }
 
 /* randomly initalize float array */
-void initRand(float *a, int n) {
+void initRand(float* a, int n) {
   for (int i = 0; i < n; ++i) {
-    a[i] = (float)rand() / (float)RAND_MAX;
+    a[i] = (float) rand() / (float) RAND_MAX;
   }
 }
 
 /* cuda error handling */
-void cudaCheck(cudaError_t err, const char *file, int line) {
+void cudaCheck(cudaError_t err, const char* file, int line) {
   if (err != cudaSuccess) {
     printf("%s in %s at line %d\n", cudaGetErrorString(err), file, line);
     exit(EXIT_FAILURE);
