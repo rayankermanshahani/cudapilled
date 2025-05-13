@@ -3,14 +3,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
-#include "stb_image.h"
-#include "stb_image_write.h"
+#include "../include/cuda_utils.h"
+#include "../include/stb_image.h"
+#include "../include/stb_image_write.h"
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <math.h>
 #include <stdio.h>
-
-#define CUDA_CHECK(err) (cudaCheck(err, __FILE__, __LINE__))
 
 #define BLUR_SIZE 3 /* number of pixels on each side (radius) of the patch */
 #define CHANNELS 3  /* RGB channels */
@@ -116,15 +115,6 @@ int saveJPGImage(const char* filename, int width, int height, int channels,
     return 0;
   }
   return 1;
-}
-
-/* cuda error handling */
-void cudaCheck(cudaError_t err, const char* file, int line) {
-  if (err != cudaSuccess) {
-    fprintf(stderr, "[CUDA ERROR] at file %s:%d\n%s\n", file, line,
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
 }
 
 /* blur an image */

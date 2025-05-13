@@ -2,7 +2,10 @@
 NVCC := nvcc
 
 # Compiler flags
-NVCC_FLAGS := -O3 -arch=sm_86
+NVCC_FLAGS := -O3 -arch=native
+
+# Common includes 
+INCLUDES := -I../include
 
 # Linker flags
 LDFLAGS := -lm -diag-suppress 550
@@ -25,7 +28,7 @@ $(BUILD_DIR):
 
 # Rule to create executables
 $(BUILD_DIR)/%: %.cu
-	$(NVCC) $(NVCC_FLAGS) $< -o $@ $(LDFLAGS)
+	$(NVCC) $(NVCC_FLAGS) $(INCLUDES) $< -o $@ $(LDFLAGS)
 
 # Clean target
 clean:

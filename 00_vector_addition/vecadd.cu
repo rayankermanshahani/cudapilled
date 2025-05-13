@@ -1,3 +1,4 @@
+#include "../include/cuda_utils.h"
 #include <cuda_runtime.h>
 #include <math.h>
 #include <stdio.h>
@@ -7,14 +8,10 @@
 #define N 100000000 // number of array elements
 #define THREADS_PER_BLOCK 256
 
-#define CUDA_CHECK(err) cudaCheck(err, __FILE__, __LINE__)
-
 /* function declarations */
 __global__ void vecAdd(const float* a, const float* b, float* c, int n);
 __global__ void vecAddAdj(const float* a, const float* b, float* c, int n);
 __global__ void vecAddSec(const float* a, const float* b, float* c, int n);
-void initRand(float* a, int n);
-void cudaCheck(cudaError_t err, const char* file, int line);
 
 /* driver program */
 int main(void) {
@@ -119,20 +116,5 @@ __global__ void vecAddSec(const float* a, const float* b, float* c, int n) {
   unsigned j = i + blockDim.x; // second section
   if (j < n) {
     c[j] = a[j] + b[j];
-  }
-}
-
-/* randomly initalize float array */
-void initRand(float* a, int n) {
-  for (int i = 0; i < n; ++i) {
-    a[i] = (float)rand() / (float)RAND_MAX;
-  }
-}
-
-/* cuda error handling */
-void cudaCheck(cudaError_t err, const char* file, int line) {
-  if (err != cudaSuccess) {
-    printf("%s in %s at line %d\n", cudaGetErrorString(err), file, line);
-    exit(EXIT_FAILURE);
   }
 }

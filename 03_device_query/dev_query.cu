@@ -1,7 +1,6 @@
+#include "../include/cuda_utils.h"
 #include <cuda_runtime.h>
 #include <stdio.h>
-
-#define CUDA_CHECK(err) cudaCheck(err, __FILE__, __LINE__)
 
 /* function declarations */
 void cudaCheck(cudaError_t err, const char* file, int line);
@@ -48,13 +47,4 @@ int main(void) {
 
   fprintf(stdout, "\nDEVICE QUERY PROGRAM COMPLETE.\n");
   return 0;
-}
-
-/* cuda error handling */
-void cudaCheck(cudaError_t err, const char* file, int line) {
-  if (err != cudaSuccess) {
-    fprintf(stdout, "%s in %s at line %d\n", cudaGetErrorString(err), file,
-            line);
-    exit(EXIT_FAILURE);
-  }
 }

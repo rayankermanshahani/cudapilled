@@ -1,3 +1,4 @@
+#include "../include/cuda_utils.h"
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,8 +6,6 @@
 
 #define N 1024 // square matrix width
 #define THREADS_PER_BLOCK 256
-
-#define CUDA_CHECK(err) cudaCheck(err, __FILE__, __LINE__)
 
 /* function declarations */
 __global__ void matVecProd(const float* A, const float* b, float* c, int n);
@@ -94,27 +93,5 @@ void cpuMatVecProd(const float* A, const float* b, float* c, int n) {
       acc += A[i * n + j] * b[j];
     }
     c[i] = acc;
-  }
-}
-
-/* randomly initalize float array for square matrix */
-void initMatRand(float* A, int n) {
-  for (int i = 0; i < n * n; ++i) {
-    A[i] = (float)rand() / (float)RAND_MAX;
-  }
-}
-
-/* randomly initalize float array for vector */
-void initVecRand(float* a, int n) {
-  for (int i = 0; i < n; ++i) {
-    a[i] = (float)rand() / (float)RAND_MAX;
-  }
-}
-
-/* cuda error handling */
-void cudaCheck(cudaError_t err, const char* file, int line) {
-  if (err != cudaSuccess) {
-    printf("%s in %s at line %d\n", cudaGetErrorString(err), file, line);
-    exit(EXIT_FAILURE);
   }
 }
