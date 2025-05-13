@@ -12,8 +12,6 @@ __global__ void matMul(const float* A, const float* B, float* C, int n);
 __global__ void matMulRow(const float* A, const float* B, float* C, int n);
 __global__ void matMulCol(const float* A, const float* B, float* C, int n);
 void cpuMatMul(const float* A, const float* B, float* C, int n);
-void initMatRand(float* A, int n);
-void cudaCheck(cudaError_t err, const char* file, int line);
 
 /* driver program */
 int main(void) {

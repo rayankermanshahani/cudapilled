@@ -10,9 +10,6 @@
 /* function declarations */
 __global__ void matVecProd(const float* A, const float* b, float* c, int n);
 void cpuMatVecProd(const float* A, const float* b, float* c, int n);
-void initMatRand(float* A, int n);
-void initVecRand(float* a, int n);
-void cudaCheck(cudaError_t err, const char* file, int line);
 
 /* driver program */
 int main(void) {

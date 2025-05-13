@@ -2,9 +2,6 @@
 #include <cuda_runtime.h>
 #include <stdio.h>
 
-/* function declarations */
-void cudaCheck(cudaError_t err, const char* file, int line);
-
 /* driver program */
 int main(void) {
   int deviceCount;
