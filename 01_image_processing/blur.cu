@@ -42,12 +42,12 @@ int main(int argc, char** argv) {
   unsigned char *Pin_d, *Pout_d;
 
   /* allocate memory for host arrays */
-  Pin_h = (unsigned char*) malloc(size);
-  Pout_h = (unsigned char*) malloc(size);
+  Pin_h = (unsigned char*)malloc(size);
+  Pout_h = (unsigned char*)malloc(size);
 
   /* allocate memory for host arrays */
-  CUDA_CHECK(cudaMalloc((void**) &Pin_d, size));
-  CUDA_CHECK(cudaMalloc((void**) &Pout_d, size));
+  CUDA_CHECK(cudaMalloc((void**)&Pin_d, size));
+  CUDA_CHECK(cudaMalloc((void**)&Pout_d, size));
 
   /* load JPG image into input host array */
   if (!loadJPGImage(file_in, &width, &height, &channels, Pin_h)) {
@@ -60,8 +60,8 @@ int main(int argc, char** argv) {
 
   /* launch config parameters */
   dim3 dimBlock(16, 16, 1);
-  dim3 dimGrid(ceil(width / (float) dimBlock.x),
-               ceil(height / (float) dimBlock.y), 1);
+  dim3 dimGrid(ceil(width / (float)dimBlock.x),
+               ceil(height / (float)dimBlock.y), 1);
 
   /* launch kernel */
   blurKernel<<<dimGrid, dimBlock>>>(Pin_d, Pout_d, width, height);
@@ -154,8 +154,8 @@ __global__ void blurKernel(unsigned char* Pin, unsigned char* Pout, int w,
     }
     /* write new pixel to the output image */
     int outIdx = (row * w + col) * CHANNELS;
-    Pout[outIdx] = (unsigned char) (pixValR / pixels);
-    Pout[outIdx + 1] = (unsigned char) (pixValG / pixels);
-    Pout[outIdx + 2] = (unsigned char) (pixValB / pixels);
+    Pout[outIdx] = (unsigned char)(pixValR / pixels);
+    Pout[outIdx + 1] = (unsigned char)(pixValG / pixels);
+    Pout[outIdx + 2] = (unsigned char)(pixValB / pixels);
   }
 }

@@ -42,12 +42,12 @@ int main(int argc, char** argv) {
   unsigned char *Pin_d, *Pout_d;
 
   /* allocate memory for host arrays */
-  Pin_h = (unsigned char*) malloc(size);
-  Pout_h = (unsigned char*) malloc(size);
+  Pin_h = (unsigned char*)malloc(size);
+  Pout_h = (unsigned char*)malloc(size);
 
   /* allocate memory for device arrays */
-  CUDA_CHECK(cudaMalloc((void**) &Pin_d, size));
-  CUDA_CHECK(cudaMalloc((void**) &Pout_d, size));
+  CUDA_CHECK(cudaMalloc((void**)&Pin_d, size));
+  CUDA_CHECK(cudaMalloc((void**)&Pout_d, size));
 
   /* load JPG image into input host array */
   if (!loadJPGImage(file_in, &width, &height, &channels, Pin_h)) {
@@ -60,8 +60,8 @@ int main(int argc, char** argv) {
 
   /* launch config parameters */
   dim3 dimBlock(16, 16, 1);
-  dim3 dimGrid(ceil(width / (float) dimBlock.x),
-               ceil(height / (float) dimBlock.y), 1); /* 25, 29, 1 */
+  dim3 dimGrid(ceil(width / (float)dimBlock.x),
+               ceil(height / (float)dimBlock.y), 1); /* 25, 29, 1 */
 
   /* launch kernel */
   grayscaleKernel<<<dimGrid, dimBlock>>>(Pout_d, Pin_d, width, height);
@@ -140,7 +140,7 @@ __global__ void grayscaleKernel(unsigned char* Pout, unsigned char* Pin,
     unsigned char b = Pin[i + 2];
 
     /* compute luminance */
-    unsigned char gray = (unsigned char) (0.21f * r + 0.72f * g + 0.07f * b);
+    unsigned char gray = (unsigned char)(0.21f * r + 0.72f * g + 0.07f * b);
 
     /* write to all channels of output */
     Pout[i] = gray;

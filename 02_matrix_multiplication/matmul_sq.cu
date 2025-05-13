@@ -24,12 +24,12 @@ int main(void) {
   size_t size = N * N * sizeof(float);                // array size in bytes
 
   // allocate host memory
-  A_h = (float*) malloc(size);
-  B_h = (float*) malloc(size);
-  C_h = (float*) malloc(size);
-  C_h_row = (float*) malloc(size);
-  C_h_col = (float*) malloc(size);
-  C_cpu = (float*) malloc(size);
+  A_h = (float*)malloc(size);
+  B_h = (float*)malloc(size);
+  C_h = (float*)malloc(size);
+  C_h_row = (float*)malloc(size);
+  C_h_col = (float*)malloc(size);
+  C_cpu = (float*)malloc(size);
 
   // allocate device memory
   CUDA_CHECK(cudaMalloc(&A_d, size));
@@ -158,7 +158,7 @@ void cpuMatMul(const float* A, const float* B, float* C, int n) {
 /* randomly initalize float array for square matrix */
 void initMatRand(float* a, int n) {
   for (int i = 0; i < n * n; ++i) { // square matrix
-    a[i] = (float) rand() / (float) RAND_MAX;
+    a[i] = (float)rand() / (float)RAND_MAX;
   }
 }
 

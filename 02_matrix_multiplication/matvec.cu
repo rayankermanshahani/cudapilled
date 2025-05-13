@@ -24,10 +24,10 @@ int main(void) {
   size_t vec_sz = N * sizeof(float);     // vector array size in bytes
 
   // allocate host memory
-  A_h = (float*) malloc(mat_sz);
-  b_h = (float*) malloc(vec_sz);
-  c_h = (float*) malloc(vec_sz);
-  c_cpu = (float*) malloc(vec_sz);
+  A_h = (float*)malloc(mat_sz);
+  b_h = (float*)malloc(vec_sz);
+  c_h = (float*)malloc(vec_sz);
+  c_cpu = (float*)malloc(vec_sz);
 
   // allocate device memory
   CUDA_CHECK(cudaMalloc(&A_d, mat_sz));
@@ -100,14 +100,14 @@ void cpuMatVecProd(const float* A, const float* b, float* c, int n) {
 /* randomly initalize float array for square matrix */
 void initMatRand(float* A, int n) {
   for (int i = 0; i < n * n; ++i) {
-    A[i] = (float) rand() / (float) RAND_MAX;
+    A[i] = (float)rand() / (float)RAND_MAX;
   }
 }
 
 /* randomly initalize float array for vector */
 void initVecRand(float* a, int n) {
   for (int i = 0; i < n; ++i) {
-    a[i] = (float) rand() / (float) RAND_MAX;
+    a[i] = (float)rand() / (float)RAND_MAX;
   }
 }
 

@@ -24,11 +24,11 @@ int main(void) {
   size_t size = N * sizeof(float);            // array size in bytes
 
   // allocate host memory
-  a_h = (float*) malloc(size);
-  b_h = (float*) malloc(size);
-  c_h = (float*) malloc(size);
-  c_h_adj = (float*) malloc(size);
-  c_h_sec = (float*) malloc(size);
+  a_h = (float*)malloc(size);
+  b_h = (float*)malloc(size);
+  c_h = (float*)malloc(size);
+  c_h_adj = (float*)malloc(size);
+  c_h_sec = (float*)malloc(size);
 
   // allocate device memory
   CUDA_CHECK(cudaMalloc(&a_d, size));
@@ -125,7 +125,7 @@ __global__ void vecAddSec(const float* a, const float* b, float* c, int n) {
 /* randomly initalize float array */
 void initRand(float* a, int n) {
   for (int i = 0; i < n; ++i) {
-    a[i] = (float) rand() / (float) RAND_MAX;
+    a[i] = (float)rand() / (float)RAND_MAX;
   }
 }
 

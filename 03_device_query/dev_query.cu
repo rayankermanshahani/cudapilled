@@ -23,9 +23,9 @@ int main(void) {
     fprintf(stdout, "  major compute capability: %d\n", deviceProperties.major);
     fprintf(stdout, "  minor compute capability: %d\n", deviceProperties.minor);
     fprintf(stdout, "  total global memory: %lf GB\n",
-            (double) deviceProperties.totalGlobalMem / (1024 * 1024 * 1024));
+            (double)deviceProperties.totalGlobalMem / (1024 * 1024 * 1024));
     fprintf(stdout, "  total constant memory: %lf GB\n",
-            (double) deviceProperties.totalConstMem / (1024 * 1024 * 1024));
+            (double)deviceProperties.totalConstMem / (1024 * 1024 * 1024));
     fprintf(stdout, "  warp size: %d\n", deviceProperties.warpSize);
     fprintf(stdout, "  clock rate: %d kHz\n", deviceProperties.clockRate);
     fprintf(stdout, "  max threads per block: %d\n",
