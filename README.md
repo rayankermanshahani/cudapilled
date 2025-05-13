@@ -20,5 +20,5 @@ Take the cudapill.
 
 ### External Dependencies:
 - Nvidia CUDA Compiler ([nvcc](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/)) -- NOTE: on Arch Linux I prefer using the proprietary CUDA drivers.
-- `stb_image.h` and `stb_image_write.h` header files from [nothings](https://github.com/nothings/stb)
+- `stb_image.h` and `stb_image_write.h` header files from [nothings](https://github.com/nothings/stb) (put them in the `/include` directory)
 
