@@ -18,7 +18,6 @@ int loadJPGImage(const char* filename, int* width, int* height, int* channels,
                  unsigned char* P);
 int saveJPGImage(const char* filename, int width, int height, int channels,
                  const unsigned char* P);
-void cudaCheck(cudaError_t err, const char* file, int line);
 __global__ void grayscaleKernel(unsigned char* Pout, unsigned char* Pin,
                                 int width, int height);
 
