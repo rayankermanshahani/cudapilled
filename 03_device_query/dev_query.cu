@@ -11,7 +11,7 @@ int main(void) {
   cudaDeviceProp deviceProperties;
   for (int i = 0; i < deviceCount; ++i) {
     fprintf(stdout, "\nCUDA Device %d:\n", i);
-    cudaGetDeviceProperties_v2(&deviceProperties, i);
+    cudaGetDeviceProperties(&deviceProperties, i);
     // do stuff with device properties
     cudaUUID_t uuid = deviceProperties.uuid;
     fprintf(stdout, "  UUID: %s\n", uuid.bytes);
@@ -23,7 +23,9 @@ int main(void) {
     fprintf(stdout, "  total constant memory: %lf GB\n",
             (double)deviceProperties.totalConstMem / (1024 * 1024 * 1024));
     fprintf(stdout, "  warp size: %d\n", deviceProperties.warpSize);
-    fprintf(stdout, "  clock rate: %d kHz\n", deviceProperties.clockRate);
+    int clockKHz = 0;
+    cudaDeviceGetAttribute(&clockKHz, cudaDevAttrClockRate, i);
+    fprintf(stdout, "  clock rate: %d kHz\n", clockKHz);
     fprintf(stdout, "  max threads per block: %d\n",
             deviceProperties.maxThreadsPerBlock);
     fprintf(stdout, "  max registers per block: %d\n",
